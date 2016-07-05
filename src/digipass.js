@@ -1,6 +1,21 @@
+#!/usr/bin/env node
+
 import BodyParser from './body-parser';
 
-const SMART_HOST = process.env.SMART_HOST;
+const ARGV = require('yargs')
+    .usage('Usage: $0 -s smarthost -p password [-p <port>]')
+    .demand(['s', 'k'])
+    .describe('s', 'smarthost to use (defaults to SMART_HOST env)')
+    .describe('k', 'password for the private key (defaults to DIGIPASS_KEY)')
+    .describe('p', 'run LMTP daemon on <port>')
+    .nargs('p', 1)
+    .default('s', process.env.SMART_HOST)
+    .default('k', process.env.DIGIPASS_KEY)
+    .help('h')
+    .alias('h', 'help')
+    .argv;
+
+const SMART_HOST = ARGV.s;
 if (!SMART_HOST) {
     console.error("Please set SMART_HOST environment variable");
     process.exit(1);
@@ -17,7 +32,7 @@ const PASS_TEMPLATE = require("passbook")("generic", {
     backgroundColor: "rgb(255,255,255)",
     organizationName: "Not affiliated with Digitec",
 });
-PASS_TEMPLATE.keys("keys", process.env.DIGIPASS_KEY);
+PASS_TEMPLATE.keys("keys", ARGV.k);
 
 mailparser.on("end", function(mail_object){
     const parser = new BodyParser(mail_object.text);

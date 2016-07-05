@@ -44,7 +44,8 @@
     "memorystream": "^0.3.1",
     "node-uuid": "^1.4.7",
     "nodemailer": "^2.4.2",
-    "passbook": "pilif/node-passbook#9f805c4d0c5fe88a897008981992aa68bfcf1267"
+    "passbook": "pilif/node-passbook#9f805c4d0c5fe88a897008981992aa68bfcf1267",
+    "yargs": "^4.7.1"
   },
   "bin": {
     "digipass": "dist/digipass.js"
