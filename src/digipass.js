@@ -1,24 +1,11 @@
 #!/usr/bin/env node
 
 import BodyParser from './body-parser';
+import Config from './config';
 
-const ARGV = require('yargs')
-    .usage('Usage: $0 -s smarthost -p password [-p <port>]')
-    .demand(['s', 'k'])
-    .describe('s', 'smarthost to use (defaults to SMART_HOST env)')
-    .describe('k', 'password for the private key (defaults to DIGIPASS_KEY)')
-    .describe('p', 'run LMTP daemon on <port>')
-    .nargs('p', 1)
-    .default('s', process.env.SMART_HOST)
-    .default('k', process.env.DIGIPASS_KEY)
-    .help('h')
-    .alias('h', 'help')
-    .argv;
-
-const SMART_HOST = ARGV.s;
-if (!SMART_HOST) {
-    console.error("Please set SMART_HOST environment variable");
-    process.exit(1);
+if (!Config.smart_host){
+    console.error("Please provide smart host");
+    process.exit(0);
 }
 
 const MailParser = require("mailparser").MailParser;
@@ -31,7 +18,7 @@ const PASS_TEMPLATE = require("passbook")("generic", {
     backgroundColor: "rgb(255,255,255)",
     organizationName: "Not affiliated with Digitec",
 });
-PASS_TEMPLATE.keys("keys", ARGV.k);
+PASS_TEMPLATE.keys("keys", Config.password);
 
 mailparser.on("end", function(mail_object){
     const parser = new BodyParser(mail_object.text);
@@ -64,7 +51,7 @@ mailparser.on("end", function(mail_object){
     });
 
     const t = require('nodemailer').createTransport({
-        host: SMART_HOST,
+        host: Config.smart_host,
         secure: false,
         name: 'digipass'
     });
