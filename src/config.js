@@ -16,17 +16,17 @@ let host = null;
 let port = null;
 
 if (ARGV.l) {
-    [host, port] = ARGV.l.split(/:/);
+    [host, port] = (""+ARGV.l).split(/:/);
     if (host && !port) {
         port = host;
-        host = '127.0.0.1';
+        host = undefined;
     }
 }
 
 export default {
     smart_host: ARGV.s,
     password: ARGV.k,
-    lmtp_port: port,
+    lmtp_port: parseInt(port, 10),
     lmtp_host: host,
     service_email_address: DIGIPASS_ADDRESS,
 }
