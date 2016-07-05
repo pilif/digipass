@@ -24,7 +24,6 @@ if (!SMART_HOST) {
 const MailParser = require("mailparser").MailParser;
 const MemoryStream = require("memorystream");
 const mailparser = new MailParser();
-const fs = require("fs");
 
 const PASS_TEMPLATE = require("passbook")("generic", {
     passTypeIdentifier: "pass.me.pilif.digipass",
