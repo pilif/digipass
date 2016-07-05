@@ -2,6 +2,7 @@
 
 import BodyParser from './body-parser';
 import Config from './config';
+import createServer from './lmtp-server';
 
 if (!Config.smart_host){
     console.error("Please provide smart host");
@@ -10,7 +11,6 @@ if (!Config.smart_host){
 
 const MailParser = require("mailparser").MailParser;
 const MemoryStream = require("memorystream");
-const mailparser = new MailParser();
 
 const PASS_TEMPLATE = require("passbook")("generic", {
     passTypeIdentifier: "pass.me.pilif.digipass",
@@ -20,62 +20,82 @@ const PASS_TEMPLATE = require("passbook")("generic", {
 });
 PASS_TEMPLATE.keys("keys", Config.password);
 
-mailparser.on("end", function(mail_object){
-    const parser = new BodyParser(mail_object.text);
-    const store = parser.getStore();
-    const coords = store.get("coords");
-
-    let pass = PASS_TEMPLATE.createPass({
-        serialNumber: require('node-uuid').v4(),
-        description: "Bestellung " + parser.getOid(),
-        logoText: "pilitec",
-        barcodes: [{
-            message: parser.getOid(),
-            format: "PKBarcodeFormatCode128",
-            messageEncoding: "iso-8859-1"
-        }],
-        locations: [
-            {"longitude": coords[0], "latitude": coords[1] }
-        ],
-
+if (Config.lmtp_port) {
+    const s = createServer(function (recepient, stream) {
+        return handleStream(stream);
     });
-    pass.primaryFields.add("title", null, "Digitec Bestellung");
-    pass.secondaryFields.add("oid", "Bestellnummer", parser.getOid());
-    pass.secondaryFields.add("store", "Store", store.get("store"));
-    pass.backFields.add("url", "Order on the web", parser.getOrderUrl());
-    pass.backFields.add("address", "Address", store.get("address"));
-    pass.loadImagesFrom("art");
-    pass.on("error", function(error) {
-      console.error(error);
-      process.exit(1);
+    console.log(`Listening on ${Config.lmtp_host}:${Config.lmtp_port}`);
+    s.listen(Config.lmtp_port, Config.lmtp_host);
+}else{
+    handleStream(process.stdin).then(function(info){
+        process.exit(0);
+    }, function(error){
+        console.error(error);
+        process.exit(1);
     });
+}
 
-    const t = require('nodemailer').createTransport({
-        host: Config.smart_host,
-        secure: false,
-        name: 'digipass'
-    });
+function handleStream(stream){
+    const mailparser = new MailParser();
+    const p = new Promise(function(fulfill, reject){
+        mailparser.on("end", function(mail_object){
+            const parser = new BodyParser(mail_object.text);
+            const store = parser.getStore();
+            const coords = store.get("coords");
 
-    const s = new MemoryStream(null, {writable: true, readable: false});
+            let pass = PASS_TEMPLATE.createPass({
+                serialNumber: require('node-uuid').v4(),
+                description: "Bestellung " + parser.getOid(),
+                logoText: "pilitec",
+                barcodes: [{
+                    message: parser.getOid(),
+                    format: "PKBarcodeFormatCode128",
+                    messageEncoding: "iso-8859-1"
+                }],
+                locations: [
+                    {"longitude": coords[0], "latitude": coords[1] }
+                ],
 
-    pass.on("end", function(){
-        t.sendMail({
-            from: "pilitec <digitec-passes@pilif.me>",
-            to: `${mail_object.to[0].name} <${mail_object.to[0].address}>`,
-            subject: mail_object.subject,
-            text: mail_object.text,
-            html: mail_object.html,
-            attachments: {
-                filename: 'order.pkpass',
-                content: s.toBuffer()
-            }
-        }, function(error, info){
-            if (error){
-                console.error(error);
-            }
+            });
+            pass.primaryFields.add("title", null, "Digitec Bestellung");
+            pass.secondaryFields.add("oid", "Bestellnummer", parser.getOid());
+            pass.secondaryFields.add("store", "Store", store.get("store"));
+            pass.backFields.add("url", "Order on the web", parser.getOrderUrl());
+            pass.backFields.add("address", "Address", store.get("address"));
+            pass.loadImagesFrom("art");
+            pass.on("error", function(error) {
+                reject(error);
+            });
+
+            const t = require('nodemailer').createTransport({
+                host: Config.smart_host,
+                secure: false,
+                name: 'digipass'
+            });
+
+            const s = new MemoryStream(null, {writable: true, readable: false});
+
+            pass.on("end", function(){
+                t.sendMail({
+                    from: `pilitec <${Config.service_email_address}>`,
+                    to: `${mail_object.to[0].name} <${mail_object.to[0].address}>`,
+                    subject: mail_object.subject,
+                    text: mail_object.text,
+                    html: mail_object.html,
+                    attachments: {
+                        filename: 'order.pkpass',
+                        content: s.toBuffer()
+                    }
+                }, function(error, info){
+                    if (error){
+                        reject(error);
+                    }
+                    fulfill({recipient: mail_object.to[0].address, info: info});
+                });
+            });
+            pass.pipe(s);
         });
     });
-    pass.pipe(s);
-});
-
-process.stdin.pipe(mailparser);
+    stream.pipe(mailparser);
+    return p;
+}
