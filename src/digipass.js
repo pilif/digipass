@@ -84,8 +84,9 @@ mailparser.on("end", function(mail_object){
                 content: s.toBuffer()
             }
         }, function(error, info){
-            console.error(error);
-            console.log(info);
+            if (error){
+                console.error(error);
+            }
         });
     });
     pass.pipe(s);
