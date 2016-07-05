@@ -70,15 +70,16 @@ function handleStream(stream){
                 reject(error);
             });
 
-            const t = require('nodemailer').createTransport({
-                host: Config.smart_host,
-                secure: false,
-                name: 'digipass'
-            });
-
-            const s = new MemoryStream(null, {writable: true, readable: false});
-
             pass.on("end", function(){
+                const t = require('nodemailer').createTransport({
+                    host: Config.smart_host,
+                    secure: false,
+                    ignoreTLS: true,
+                    name: 'digipass'
+                });
+
+                const s = new MemoryStream(null, {writable: true, readable: false});
+
                 t.sendMail({
                     from: `pilitec <${Config.service_email_address}>`,
                     to: `${mail_object.from[0].name} <${mail_object.from[0].address}>`,
@@ -91,7 +92,7 @@ function handleStream(stream){
                     }
                 }, function(error, info){
                     if (error){
-                        reject(error);
+                        return reject(error);
                     }
                     fulfill({recipient: mail_object.to[0].address, info: info});
                 });
