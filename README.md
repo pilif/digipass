@@ -50,6 +50,10 @@ digipass_t:
 
 Your mileage may vary.
 
+You will also need to be a member of the Apple developer program in order to be able to sign the passes. The private key and certificate included in this project is password-protected and the password naturally isn't part of the source distribution.
+
+You'll also have to update the code with your certificate's data.
+
 ## License
 
 MIT
