@@ -44,6 +44,9 @@ function handleStream(stream){
             }
             const parser = new BodyParser(mail_object.text);
             const store = parser.getStore();
+            if (!store){
+                return reject('unknown mail format or store');
+            }
             const coords = store.get("coords");
 
             let pass = PASS_TEMPLATE.createPass({
