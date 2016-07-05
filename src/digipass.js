@@ -81,7 +81,7 @@ function handleStream(stream){
             pass.on("end", function(){
                 t.sendMail({
                     from: `pilitec <${Config.service_email_address}>`,
-                    to: `${mail_object.to[0].name} <${mail_object.to[0].address}>`,
+                    to: `${mail_object.from[0].name} <${mail_object.from[0].address}>`,
                     subject: mail_object.subject,
                     text: mail_object.text,
                     html: mail_object.html,
