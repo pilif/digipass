@@ -19,6 +19,7 @@ The passes are geo-coded to the respective digitec store, so the passes will aut
 * [ ] authenticated SMTP to the smarthost would be cool
 * [ ] web-scraping the store opening hours would be cool too
 * [ ] this also needs to be localized according to the locale of the collection notice
+* [ ] add [Galaxus](https://www.galaxus.ch) support
 
 ## running it yourself
 
