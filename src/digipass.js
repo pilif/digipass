@@ -39,6 +39,9 @@ function handleStream(stream){
     const mailparser = new MailParser();
     const p = new Promise(function(fulfill, reject){
         mailparser.on("end", function(mail_object){
+            if (mail_object.from[0].address == Config.service_email_address){
+                return reject('refusing to send to myself');
+            }
             const parser = new BodyParser(mail_object.text);
             const store = parser.getStore();
             const coords = store.get("coords");

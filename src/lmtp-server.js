@@ -44,7 +44,7 @@ export default function(process_stream){
                 }).then(function(rec){
                     per_recipient[rec] = [null, '2.0.0 queued'];
                 }, function(err){
-                    per_recipient[err.rec] = [{responseCode: 451, message: "nope"}]
+                    per_recipient[err.rec] = [{responseCode: 451, message: err.err}]
                 })
             });
             ready.then(function(){
