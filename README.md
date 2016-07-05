@@ -18,6 +18,7 @@ The passes are geo-coded to the respective digitec store, so the passes will aut
 * [ ] as digitec has no API and as I don't want your user-data, we can't remove the passes when people fetch their orders
 * [ ] authenticated SMTP to the smarthost would be cool
 * [ ] web-scraping the store opening hours would be cool too
+* [ ] this also needs to be localized according to the locale of the collection notice
 
 ## running it yourself
 
