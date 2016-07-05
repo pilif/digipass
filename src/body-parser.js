@@ -13,7 +13,7 @@ export default class BodyParser {
     getOid(){
         if (this.oid) return this.oid;
         [,this.lang, this.oid] =
-            this.body.match(ORDER_RE);
+            (this.body.match(ORDER_RE) || []);
 
         return this.oid;
     }
@@ -21,13 +21,16 @@ export default class BodyParser {
     getLanguage(){
         if (this.lang) return this.lang;
         [,this.lang, this.oid]
-            = this.body.match(ORDER_RE);
+            = (this.body.match(ORDER_RE) || []);
         return this.lang;
     }
 
     getStore(){
         if (this.coords) return this.coords;
-        this.coords = STORES.get(parseInt(this.body.match(STORE_RE)[1], 10));
+        const m = this.body.match(STORE_RE);
+        if (!m) return null;
+
+        this.coords = STORES.get(parseInt(m[1], 10));
         return this.coords;
     }
 
