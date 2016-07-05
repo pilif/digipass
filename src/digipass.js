@@ -21,7 +21,7 @@ mailparser.on("end", function(mail_object){
     let pass = PASS_TEMPLATE.createPass({
         serialNumber: require('node-uuid').v4(),
         description: "Bestellung " + parser.getOid(),
-        logoText: "Nearly Digitec",
+        logoText: "pilitec",
         barcodes: [{
             message: parser.getOid(),
             format: "PKBarcodeFormatCode128",
