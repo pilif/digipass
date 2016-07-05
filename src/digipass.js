@@ -1,7 +1,13 @@
 import BodyParser from './body-parser';
 
+const SMART_HOST = process.env.SMART_HOST;
+if (!SMART_HOST) {
+    console.error("Please set SMART_HOST environment variable");
+    process.exit(1);
+}
 
 const MailParser = require("mailparser").MailParser;
+const MemoryStream = require("memorystream");
 const mailparser = new MailParser();
 const fs = require("fs");
 
@@ -42,8 +48,32 @@ mailparser.on("end", function(mail_object){
       console.error(error);
       process.exit(1);
     });
-    const file = fs.createWriteStream(process.env.OUTDIR + "/blah.pkpass");
-    pass.pipe(file);
+
+    const t = require('nodemailer').createTransport({
+        host: SMART_HOST,
+        secure: false,
+        name: 'digipass'
+    });
+
+    const s = new MemoryStream(null, {writable: true, readable: false});
+
+    pass.on("end", function(){
+        t.sendMail({
+            from: "pilitec <digitec-passes@pilif.me>",
+            to: `${mail_object.to[0].name} <${mail_object.to[0].address}>`,
+            subject: mail_object.subject,
+            text: mail_object.text,
+            html: mail_object.html,
+            attachments: {
+                filename: 'order.pkpass',
+                content: s.toBuffer()
+            }
+        }, function(error, info){
+            console.error(error);
+            console.log(info);
+        });
+    });
+    pass.pipe(s);
 });
 
 process.stdin.pipe(mailparser);
