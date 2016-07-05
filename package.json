@@ -45,7 +45,7 @@
     "node-uuid": "^1.4.7",
     "nodemailer": "^2.4.2",
     "passbook": "pilif/node-passbook#9f805c4d0c5fe88a897008981992aa68bfcf1267",
-    "smtp-server": "pilif/smtp-server#2b8cf7992d9d1e72380ea2b51c566aa512ee1605",
+    "smtp-server": "pilif/smtp-server#815116ab1e36540a24bffbfabcaa460cde3931a4",
     "yargs": "^4.7.1"
   },
   "bin": {
