@@ -1,14 +1,52 @@
 # digipass
 
-When this project is done, it will be a small LMTP daemon that you can hook into any mailserver of yours.
+Turn [digitec.ch](https://www.digitec.ch) collection notices into iOS Wallet passes.
 
-Once that's running, you can forward it [digitec.ch](https://www.digitec.ch) collection notices which it will then convert into iOS Wallet passes which will be location aware and will automatically pop up as you get close to the store.
+This is the code that's powering the `digipass@pilif.me` email address.
 
-Right now, all this does is parsing the mails and creating the passes. LMTP support will come in a later instance
+If you have a digitec collection notice, forward it to `digipass@pilif.me` and you will get the exact same message back, but the PDF has now been replaced with an iOS pass that you can add to your wallet.
+
+The passes are geo-coded to the respective digitec store, so the passes will automatically pop up as you get close to the store.
 
 ## screenshot
 
 ![screenshot](./screenshot.png?raw=1)
+
+## TODO
+
+* [ ] currently has a hard-coded list of digitec stores. Should probably web-scrape them
+* [ ] as digitec has no API and as I don't want your user-data, we can't remove the passes when people fetch their orders
+* [ ] authenticated SMTP to the smarthost would be cool
+* [ ] web-scraping the store opening hours would be cool too
+
+## running it yourself
+
+In order to run this yourself, you need to have a smart-host available for sending mail. It currently must be configured to not require authentication (as mine doesn't), but I would accept patches to change this. It's quite trivial to do.
+
+You also need a mail server to accept the mails. You can either have your mail server invoke the application and pass the mail in via STDIN, or you run the script with `-l [host:]<port>` which will cause it to run as a local LMTP daemon. Then you just pass your mail to it.
+
+In my case, I'm using exim with the following router:
+
+```
+digipass:
+  driver = accept
+  domains = pilif.me
+  local_parts = digipass
+  transport = digipass_t
+```
+
+and the following transport
+
+```
+digipass_t:
+  driver = smtp
+  protocol = lmtp
+  hosts = $INSERT_HOST_HERE
+  hosts_override = true
+  port = 5959
+```
+
+Your mileage may vary.
 
 ## License
 
