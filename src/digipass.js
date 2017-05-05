@@ -48,6 +48,7 @@ function handleStream(stream){
                 return reject('unknown mail format or store');
             }
             const coords = store.get("coords");
+            const outstream = new MemoryStream(null, {writable: true, readable: false});
 
             let pass = PASS_TEMPLATE.createPass({
                 serialNumber: require('node-uuid').v4(),
@@ -81,7 +82,6 @@ function handleStream(stream){
                     name: 'digipass'
                 });
 
-                const s = new MemoryStream(null, {writable: true, readable: false});
 
                 t.sendMail({
                     from: `pilitec <${Config.service_email_address}>`,
@@ -91,7 +91,7 @@ function handleStream(stream){
                     html: mail_object.html,
                     attachments: {
                         filename: 'order.pkpass',
-                        content: s.toBuffer()
+                        content: outstream.toBuffer()
                     }
                 }, function(error, info){
                     if (error){
@@ -100,7 +100,7 @@ function handleStream(stream){
                     fulfill({recipient: mail_object.to[0].address, info: info});
                 });
             });
-            pass.pipe(s);
+            pass.pipe(outstream);
         });
     });
     stream.pipe(mailparser);
