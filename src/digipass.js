@@ -58,6 +58,10 @@ function handleStream(stream){
                     message: parser.getOid(),
                     format: "PKBarcodeFormatCode128",
                     messageEncoding: "iso-8859-1"
+                },{
+                    message: parser.getOid(),
+                    format: "PKBarcodeFormatQR",
+                    messageEncoding: "iso-8859-1"
                 }],
                 locations: [
                     {"longitude": coords[0], "latitude": coords[1] }
