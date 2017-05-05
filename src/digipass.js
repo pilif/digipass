@@ -18,7 +18,7 @@ const PASS_TEMPLATE = require("passbook")("generic", {
     backgroundColor: "rgb(255,255,255)",
     organizationName: "Not affiliated with Digitec",
 });
-PASS_TEMPLATE.keys("keys", Config.password);
+PASS_TEMPLATE.keys(require("path").dirname(process.mainModule.filename) + "/../keys", Config.password);
 
 if (Config.lmtp_port) {
     const s = createServer(function (recepient, stream) {
@@ -68,7 +68,7 @@ function handleStream(stream){
             pass.secondaryFields.add("store", "Store", store.get("store"));
             pass.backFields.add("url", "Order on the web", parser.getOrderUrl());
             pass.backFields.add("address", "Address", store.get("address"));
-            pass.loadImagesFrom("art");
+            pass.loadImagesFrom(require("path").dirname(process.mainModule.filename) + "/../art");
             pass.on("error", function(error) {
                 reject(error);
             });
